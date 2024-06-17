@@ -1,8 +1,11 @@
 import React from "react";
 import { auth, provider } from "../../config/firebase-config"
 import { signInWithPopup } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 export const Auth = () => {
+
+  const navigate = useNavigate();
 
   //google sign in
   const signInWithGoogle = async () => {
@@ -16,7 +19,8 @@ export const Auth = () => {
       profilePhoto: results.user.photoURL,
       isAuth: true,
     }
-    localStorage.setItem("auth", JSON.stringify(authInfo))
+    localStorage.setItem("auth", JSON.stringify(authInfo));
+    navigate("/wallet-watcher"); //when after sign in go to "/wallet-watcher"
   };
 
   return (
