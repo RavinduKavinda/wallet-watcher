@@ -7,7 +7,16 @@ export const Auth = () => {
   //google sign in
   const signInWithGoogle = async () => {
     const results = await signInWithPopup(auth, provider);
-    console.log(results);
+    //console.log(results);
+
+    //store local storage
+    const authInfo = {
+      userID: results.user.uid,
+      name: results.user.displayName,
+      profilePhoto: results.user.photoURL,
+      isAuth: true,
+    }
+    localStorage.setItem("auth", JSON.stringify(authInfo))
   };
 
   return (
