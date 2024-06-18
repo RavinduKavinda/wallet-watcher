@@ -1,6 +1,19 @@
 import React from "react";
+import { useAddTransaction } from "../../hooks/useAddTransaction"
 
 export const Expense = () => {
+
+  const { addTransaction } = useAddTransaction();
+
+  const onSubmit = (e) => {
+    e.preventDefault()
+    addTransaction({
+      description: "adasd",
+      transactionAmount: 23,
+      transactionType: "expense"
+    })
+  };
+
   return (
     <>
     {/* My Wallet */}
@@ -28,7 +41,7 @@ export const Expense = () => {
         </div>
 
         {/* add transactions */}
-        <form action="" className="add-transaction">
+        <form action="" className="add-transaction" onSubmit={onSubmit}>
           <input type="text" placeholder="Description" required />
           <input type="number" placeholder="Amount" required />
           <label htmlFor="expense">Expense</label>
