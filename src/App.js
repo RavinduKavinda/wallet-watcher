@@ -1,7 +1,7 @@
-import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Auth } from './pages/auth/index';
 import { Expense } from './pages/expence/index';
+import './index.css';
 
 function App() {
   return (
