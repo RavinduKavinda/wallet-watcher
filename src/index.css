@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* font */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+.dm-sans-font {
+    font-family: "DM Sans", sans-serif;
+  }
+
+/* auth page */
+
+/* act as a border */
+.card-wrapper{
+    @apply relative rounded-lg p-1 overflow-hidden bg-white h-56 w-[400px]
+}
+
+/* gradient */
+.card-wrapper::before {
+    background: conic-gradient(
+        rgb(0, 26, 255) 0deg,
+        rgba(5, 68, 164, 0.4) 0deg,
+        transparent 80deg
+    );
+
+    @apply absolute -top-56 -left-[400px] w-[300%] h-[300%] content-[''] animate-border-spin 
+}
+
+.card-content {
+    @apply absolute w-[calc(100%-8px)] h-[calc(100%-8px)] bg-white rounded p-6 
+}
+
