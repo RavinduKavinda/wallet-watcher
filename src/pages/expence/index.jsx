@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 
 export const Expense = () => {
   const { addTransaction } = useAddTransaction();
-  const { transactions } = useGetTransactions();
+  const { transactions, transactionsTotal } = useGetTransactions();
 
   const handleChange = (e) => {
     setDescription(e.target.value);
@@ -36,25 +36,25 @@ export const Expense = () => {
     setTransactionType("expense");
   };
 
-  //get user info
-  const { name, profilePhoto } = useGetUserInfo();
-  const navigate = useNavigate();
-  const signUserOut = async () => {
-    try {
-      await signOut(auth);
-      localStorage.clear();
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    //get user info
+    const { name, profilePhoto } = useGetUserInfo();
+    const navigate = useNavigate();
+    const signUserOut = async () => {
+      try {
+        await signOut(auth);
+        localStorage.clear();
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
   return (
     <>
       {/* My Wallet */}
       <div className="wallet-watcher bg-slate-100">
         <h1 className="justify-center text-center dm-sans-font text-[35px] font-bold py-10 pb-4">
-          {name}'s Wallet Watcher
+        {name}'s Wallet Watcher
         </h1>
 
         <div className="container px-[5%] grid grid-cols-3 gap-10">
@@ -62,19 +62,19 @@ export const Expense = () => {
           <div className="">
             <div className="balance border border-blue-700 p-4 rounded-lg shadow-blue-600 shadow-sm">
               <h3 className="text-[30px]">My Balance</h3>
-              <h2 className="text-[26px]">LKR 0.00</h2>
+              <h2 className="text-[26px]">LKR {transactionsTotal.balance.toFixed(2)}</h2>
             </div>
 
             <div className="summary p-5">
               {/* Income */}
               <div className="income border border-green-500 p-4 rounded-lg shadow-green-500 shadow-sm mb-2">
                 <h4 className="text-[20px] font-semibold">Income</h4>
-                <p className="text-[16px] font-medium">LKR 0.00</p>
+                <p className="text-[16px] font-medium">LKR {transactionsTotal.income.toFixed(2)}</p>
               </div>
               {/* Expenses */}
               <div className="expenses border border-red-500 p-4 rounded-lg shadow-red-500 shadow-sm">
                 <h4 className="text-[20px] font-semibold">Expenses</h4>
-                <p className="text-[16px] font-medium">LKR 0.00</p>
+                <p className="text-[16px] font-medium">LKR {transactionsTotal.expense.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -210,50 +210,42 @@ export const Expense = () => {
           {/* All Transaction */}
           <ul>
             {transactions.length > 0 ? (
-              transactions
-                .sort((a, b) => b.createdAT.seconds - a.createdAT.seconds) // Sort by createdAT
-                .map((transaction) => {
-                  const {
-                    description,
-                    transactionAmount,
-                    transactionType,
-                    createdAT,
-                    id,
-                  } = transaction;
+              transactions.map((transaction) => {
+                const { description, transactionAmount, transactionType, createdAT, id } =
+                  transaction;
 
-                  const formattedDate = format(
-                    new Date(createdAT.seconds * 1000),
-                    "PPpp"
-                  );
+                const formattedDate = createdAT?.seconds
+                  ? format(new Date(createdAT.seconds * 1000), "PPpp")
+                  : "Unknown date";
 
-                  return (
-                    <li
-                      key={id}
-                      className="px-4 py-1 border-b border-gray-400 mb-2"
+                return (
+                  <li
+                    key={id} 
+                    className="px-4 py-1 border-b border-gray-400 mb-2"
                     >
-                      <h4 className="text-[20px] capitalize font-semibold">
-                        {description}
-                      </h4>
+                    <h4 className="text-[20px] capitalize font-semibold">
+                      {description}
+                    </h4>
 
-                      <div className="flex items-center justify-between">
-                        <p>
-                          LKR {transactionAmount}{" "}
-                          <label
-                            htmlFor=""
-                            style={{
-                              color:
-                                transactionType === "expense" ? "red" : "green",
-                            }}
-                            className="capitalize"
-                          >
-                            {transactionType}
-                          </label>
-                        </p>
-                        <p className="text-sm text-gray-500">{formattedDate}</p>
-                      </div>
-                    </li>
-                  );
-                })
+                    <div className="flex items-center justify-between">
+                      <p>
+                      LKR {transactionAmount}{" "}
+                      <label
+                        htmlFor=""
+                        style={{
+                          color:
+                            transactionType === "expense" ? "red" : "green",
+                        }}
+                        className="capitalize"
+                      >
+                        {transactionType}
+                      </label>
+                    </p>
+                    <p className="text-sm text-gray-500">{formattedDate}</p>
+                    </div>
+                  </li>
+                );
+              })
             ) : (
               <li className="px-4 py-1">
                 <h4 className="text-[20px] capitalize font-semibold">
