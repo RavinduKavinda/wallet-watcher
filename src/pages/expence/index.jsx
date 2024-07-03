@@ -83,9 +83,18 @@ export const Expense = () => {
           <div className="order-2 sm:order-1">
             <div className="balance border border-blue-700 p-4 rounded-lg shadow-blue-600 shadow-sm">
               <h3 className="text-[30px]">My Balance</h3>
-              <h2 className="text-[26px]">
+              {
+                transactionsTotal.balance.toFixed(2) >= 0 ? (
+                  <h2 className="text-[26px]">
                 LKR {transactionsTotal.balance.toFixed(2)}
               </h2>
+                ) : (
+                  <h2 className="text-[26px]">
+                -LKR {(transactionsTotal.balance* -1).toFixed(2)}
+              </h2>
+                )
+              }
+              
             </div>
 
             <div className="summary p-5">
