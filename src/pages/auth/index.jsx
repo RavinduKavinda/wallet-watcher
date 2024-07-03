@@ -29,11 +29,11 @@ export const Auth = () => {
       style={{ backgroundImage: "url('assest/background.png')" }}
     >
       <div className="card-wrapper">
-        <div className="card-content ">
+        <div className="card-content">
           <h1 className="dm-sans-font text-[32px] font-[700] text-center leading-tight pb-6">
             Welcome To
             <br />
-            <span className="text-cyan-500	text-[40px]">Wallet Watcher !</span>
+            <span className="text-cyan-500	text-[40px]">Wallet Watcher!</span>
           </h1>
           <div className="flex justify-center ">
             <button

@@ -13,7 +13,7 @@
 
 /* act as a border */
 .card-wrapper{
-    @apply relative rounded-lg p-1 overflow-hidden bg-white h-56 w-[400px]
+    @apply relative rounded-3xl p-1  bg-white h-[270px] w-[300px] sm:w-[400px] sm:h-[230px] overflow-hidden
 }
 
 /* gradient */
@@ -24,10 +24,10 @@
         transparent 80deg
     );
 
-    @apply absolute -top-56 -left-[400px] w-[300%] h-[300%] content-[''] animate-border-spin 
+    @apply absolute -top-[270px] -left-[300px] sm:-top-[230px] sm:-left-[400px] w-[300%] h-[300%] content-[''] animate-border-spin 
 }
 
 .card-content {
-    @apply absolute w-[calc(100%-8px)] h-[calc(100%-8px)] bg-white rounded p-6 
+    @apply absolute w-[calc(100%-8px)] h-[calc(100%-8px)] rounded-3xl p-6 bg-white
 }
 
