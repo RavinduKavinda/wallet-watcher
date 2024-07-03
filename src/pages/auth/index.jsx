@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { auth, provider } from "../../config/firebase-config";
 import { signInWithPopup } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import { useGetUserInfo } from "../../hooks/useGetUserInfo";
 
 export const Auth = () => {
   const navigate = useNavigate();
+  const { isAuth } = useGetUserInfo(); //redirect when user sign in
 
   //google sign in
   const signInWithGoogle = async () => {
@@ -22,6 +24,10 @@ export const Auth = () => {
     localStorage.setItem("auth", JSON.stringify(authInfo));
     navigate("/wallet-watcher"); //when after sign in go to "/wallet-watcher"
   };
+
+  if(isAuth){
+    return <Navigate to="/wallet-watcher" />;
+  }
 
   return (
     <div
