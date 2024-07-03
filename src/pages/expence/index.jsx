@@ -7,7 +7,6 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebase-config";
 import { useNavigate } from "react-router-dom";
 
-
 export const Expense = () => {
   const { addTransaction } = useAddTransaction();
   const { transactions, transactionsTotal } = useGetTransactions();
@@ -36,52 +35,80 @@ export const Expense = () => {
     setTransactionType("expense");
   };
 
-    //get user info
-    const { name, profilePhoto } = useGetUserInfo();
-    const navigate = useNavigate();
-    const signUserOut = async () => {
-      try {
-        await signOut(auth);
-        localStorage.clear();
-        navigate("/");
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  //get user info
+  const { name, profilePhoto } = useGetUserInfo();
+  const navigate = useNavigate();
+  const signUserOut = async () => {
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
       {/* My Wallet */}
       <div className="wallet-watcher bg-slate-100">
         <h1 className="justify-center text-center dm-sans-font text-[35px] font-bold py-10 pb-4">
-        {name}'s Wallet Watcher
+          {name}'s Wallet Watcher
         </h1>
 
-        <div className="container px-[5%] grid grid-cols-3 gap-10">
+        <div className=" px-4 sm:px-6 lg:px-[10%] grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* profile photo and signout */}
+          <div className="flex flex-col items-center w-full space-y-4 order-1 sm:order-3">
+            {profilePhoto && (
+              <div className="profile flex justify-center items-center">
+                <img
+                  src={profilePhoto}
+                  alt="Profile"
+                  className="profilePhoto w-48 h-48 rounded-full border-2 border-blue-300"
+                />
+              </div>
+            )}
+            {/* sign out */}
+            <div className="pt-10">
+              <button
+                className="sign-out bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                onClick={signUserOut}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+
           {/* balance */}
-          <div className="">
+          <div className="order-2 sm:order-1">
             <div className="balance border border-blue-700 p-4 rounded-lg shadow-blue-600 shadow-sm">
               <h3 className="text-[30px]">My Balance</h3>
-              <h2 className="text-[26px]">LKR {transactionsTotal.balance.toFixed(2)}</h2>
+              <h2 className="text-[26px]">
+                LKR {transactionsTotal.balance.toFixed(2)}
+              </h2>
             </div>
 
             <div className="summary p-5">
               {/* Income */}
               <div className="income border border-green-500 p-4 rounded-lg shadow-green-500 shadow-sm mb-2">
                 <h4 className="text-[20px] font-semibold">Income</h4>
-                <p className="text-[16px] font-medium">LKR {transactionsTotal.income.toFixed(2)}</p>
+                <p className="text-[16px] font-medium">
+                  LKR {transactionsTotal.income.toFixed(2)}
+                </p>
               </div>
               {/* Expenses */}
               <div className="expenses border border-red-500 p-4 rounded-lg shadow-red-500 shadow-sm">
                 <h4 className="text-[20px] font-semibold">Expenses</h4>
-                <p className="text-[16px] font-medium">LKR {transactionsTotal.expense.toFixed(2)}</p>
+                <p className="text-[16px] font-medium">
+                  LKR {transactionsTotal.expense.toFixed(2)}
+                </p>
               </div>
             </div>
           </div>
 
           {/* add transactions */}
-          <div className="flex items-center justify-center h-full px-[2%]">
-            <form className="add-transaction" onSubmit={onSubmit}>
+          <div className="flex items-center justify-center h-full px-[2%] order-3 sm:order-2">
+            <form className="add-transaction w-full" onSubmit={onSubmit}>
               <textarea
                 placeholder="Description"
                 required
@@ -174,29 +201,6 @@ export const Expense = () => {
               </button>
             </form>
           </div>
-
-          {/* profile photo and signout */}
-          <div className="flex flex-col items-center space-y-4">
-  {profilePhoto && (
-    <div className="profile flex justify-center items-center">
-      <img
-        src={profilePhoto}
-        alt="Profile"
-        className="profilePhoto w-24 h-24 rounded-full border-2 border-blue-300 scale-150"
-      />
-    </div>
-  )}
-  {/* sign out */}
-  <div className="pt-10">
-    <button
-      className="sign-out bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-      onClick={signUserOut}
-    >
-      Sign Out
-    </button>
-  </div>
-</div>
-
         </div>
       </div>
 
@@ -211,8 +215,13 @@ export const Expense = () => {
           <ul>
             {transactions.length > 0 ? (
               transactions.map((transaction) => {
-                const { description, transactionAmount, transactionType, createdAT, id } =
-                  transaction;
+                const {
+                  description,
+                  transactionAmount,
+                  transactionType,
+                  createdAT,
+                  id,
+                } = transaction;
 
                 const formattedDate = createdAT?.seconds
                   ? format(new Date(createdAT.seconds * 1000), "PPpp")
@@ -220,28 +229,28 @@ export const Expense = () => {
 
                 return (
                   <li
-                    key={id} 
+                    key={id}
                     className="px-4 py-1 border-b border-gray-400 mb-2"
-                    >
+                  >
                     <h4 className="text-[20px] capitalize font-semibold">
                       {description}
                     </h4>
 
                     <div className="flex items-center justify-between">
                       <p>
-                      LKR {transactionAmount}{" "}
-                      <label
-                        htmlFor=""
-                        style={{
-                          color:
-                            transactionType === "expense" ? "red" : "green",
-                        }}
-                        className="capitalize"
-                      >
-                        {transactionType}
-                      </label>
-                    </p>
-                    <p className="text-sm text-gray-500">{formattedDate}</p>
+                        LKR {transactionAmount}{" "}
+                        <label
+                          htmlFor=""
+                          style={{
+                            color:
+                              transactionType === "expense" ? "red" : "green",
+                          }}
+                          className="capitalize"
+                        >
+                          {transactionType}
+                        </label>
+                      </p>
+                      <p className="text-sm text-gray-500">{formattedDate}</p>
                     </div>
                   </li>
                 );
