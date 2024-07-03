@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { format } from "date-fns"; // Import date-fns for date formatting
 import { useAddTransaction } from "../../hooks/useAddTransaction";
 import { useGetTransactions } from "../../hooks/useGetTransactions";
+import { useGetUserInfo } from "../../hooks/useGetUserInfo";
+import { signOut } from "firebase/auth";
+import { auth } from "../../config/firebase-config";
+import { useNavigate } from "react-router-dom";
+
 
 export const Expense = () => {
   const { addTransaction } = useAddTransaction();
@@ -31,12 +36,25 @@ export const Expense = () => {
     setTransactionType("expense");
   };
 
+  //get user info
+  const { name, profilePhoto } = useGetUserInfo();
+  const navigate = useNavigate();
+  const signUserOut = async () => {
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       {/* My Wallet */}
       <div className="wallet-watcher bg-slate-100">
         <h1 className="justify-center text-center dm-sans-font text-[35px] font-bold py-10 pb-4">
-          Wallet Watcher
+          {name}'s Wallet Watcher
         </h1>
 
         <div className="container px-[5%] grid grid-cols-3 gap-10">
@@ -156,6 +174,29 @@ export const Expense = () => {
               </button>
             </form>
           </div>
+
+          {/* profile photo and signout */}
+          <div className="flex flex-col items-center space-y-4">
+  {profilePhoto && (
+    <div className="profile flex justify-center items-center">
+      <img
+        src={profilePhoto}
+        alt="Profile"
+        className="profilePhoto w-24 h-24 rounded-full border-2 border-blue-300 scale-150"
+      />
+    </div>
+  )}
+  {/* sign out */}
+  <div className="pt-10">
+    <button
+      className="sign-out bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+      onClick={signUserOut}
+    >
+      Sign Out
+    </button>
+  </div>
+</div>
+
         </div>
       </div>
 
@@ -172,8 +213,13 @@ export const Expense = () => {
               transactions
                 .sort((a, b) => b.createdAT.seconds - a.createdAT.seconds) // Sort by createdAT
                 .map((transaction) => {
-                  const { description, transactionAmount, transactionType, createdAT, id } =
-                    transaction;
+                  const {
+                    description,
+                    transactionAmount,
+                    transactionType,
+                    createdAT,
+                    id,
+                  } = transaction;
 
                   const formattedDate = format(
                     new Date(createdAT.seconds * 1000),
@@ -181,28 +227,30 @@ export const Expense = () => {
                   );
 
                   return (
-                    <li key={id} className="px-4 py-1 border-b border-gray-400 mb-2">
+                    <li
+                      key={id}
+                      className="px-4 py-1 border-b border-gray-400 mb-2"
+                    >
                       <h4 className="text-[20px] capitalize font-semibold">
                         {description}
                       </h4>
 
                       <div className="flex items-center justify-between">
                         <p>
-                        LKR {transactionAmount}{" "}
-                        <label
-                          htmlFor=""
-                          style={{
-                            color:
-                              transactionType === "expense" ? "red" : "green",
-                          }}
-                          className="capitalize"
-                        >
-                          {transactionType}
-                        </label>
-                      </p>
-                      <p className="text-sm text-gray-500">{formattedDate}</p>
+                          LKR {transactionAmount}{" "}
+                          <label
+                            htmlFor=""
+                            style={{
+                              color:
+                                transactionType === "expense" ? "red" : "green",
+                            }}
+                            className="capitalize"
+                          >
+                            {transactionType}
+                          </label>
+                        </p>
+                        <p className="text-sm text-gray-500">{formattedDate}</p>
                       </div>
-                      
                     </li>
                   );
                 })
