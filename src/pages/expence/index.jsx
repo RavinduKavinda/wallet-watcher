@@ -1,15 +1,21 @@
 import React, { useState } from "react";
-import { format } from "date-fns"; // Import date-fns for date formatting
+import { format, isValid } from "date-fns"; // Import date-fns for date formatting
 import { useAddTransaction } from "../../hooks/useAddTransaction";
 import { useGetTransactions } from "../../hooks/useGetTransactions";
 import { useGetUserInfo } from "../../hooks/useGetUserInfo";
 import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebase-config";
 import { useNavigate } from "react-router-dom";
+import { useDeleteTransaction } from "../../hooks/useDeleteTransaction";
 
 export const Expense = () => {
   const { addTransaction } = useAddTransaction();
-  const { transactions, transactionsTotal } = useGetTransactions();
+  const { transactions, transactionsTotal, setTransactions } =
+    useGetTransactions();
+  const { deleteTransaction } = useDeleteTransaction();
+  const [description, setDescription] = useState("");
+  const [transactionAmount, setTransactionAmount] = useState("");
+  const [transactionType, setTransactionType] = useState("income");
 
   const handleChange = (e) => {
     setDescription(e.target.value);
@@ -17,25 +23,19 @@ export const Expense = () => {
     e.target.style.height = `${e.target.scrollHeight}px`; // Set the height to the scrollHeight of the content
   };
 
-  /* get data from form */
-  const [description, setDescription] = useState("");
-  const [transactionAmount, setTransactionAmount] = useState(0);
-  const [transactionType, setTransactionType] = useState("expense");
-
   const onSubmit = (e) => {
     e.preventDefault();
-    addTransaction({
+    const transaction = {
       description,
       transactionAmount: parseFloat(transactionAmount),
       transactionType,
-      createdAT: new Date(), // Add createdAT timestamp
-    });
+    };
+    addTransaction(transaction);
     setDescription("");
-    setTransactionAmount(0);
+    setTransactionAmount("");
     setTransactionType("expense");
   };
 
-  //get user info
   const { name, profilePhoto } = useGetUserInfo();
   const navigate = useNavigate();
   const signUserOut = async () => {
@@ -45,6 +45,28 @@ export const Expense = () => {
       navigate("/");
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleDelete = async (transactionId) => {
+    const transactionToDelete = transactions.find(
+      (t) => t.id === transactionId
+    );
+    if (!transactionToDelete) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete this transaction?\n\nDescription: ${
+        transactionToDelete.description
+      }\nAmount: LKR ${transactionToDelete.transactionAmount.toFixed(2)}`
+    );
+
+    if (confirmDelete) {
+      try {
+        await deleteTransaction(transactionId);
+        setTransactions((prev) => prev.filter((t) => t.id !== transactionId));
+      } catch (error) {
+        console.error("Error deleting transaction:", error);
+      }
     }
   };
 
@@ -83,18 +105,15 @@ export const Expense = () => {
           <div className="order-2 sm:order-1">
             <div className="balance border border-blue-700 p-4 rounded-lg shadow-blue-600 shadow-sm">
               <h3 className="text-[30px]">My Balance</h3>
-              {
-                transactionsTotal.balance.toFixed(2) >= 0 ? (
-                  <h2 className="text-[26px]">
-                LKR {transactionsTotal.balance.toFixed(2)}
-              </h2>
-                ) : (
-                  <h2 className="text-[26px]">
-                -LKR {(transactionsTotal.balance* -1).toFixed(2)}
-              </h2>
-                )
-              }
-              
+              {transactionsTotal.balance.toFixed(2) >= 0 ? (
+                <h2 className="text-[26px]">
+                  LKR {transactionsTotal.balance.toFixed(2)}
+                </h2>
+              ) : (
+                <h2 className="text-[26px]">
+                  -LKR {(transactionsTotal.balance * -1).toFixed(2)}
+                </h2>
+              )}
             </div>
 
             <div className="summary p-5">
@@ -211,67 +230,46 @@ export const Expense = () => {
             </form>
           </div>
         </div>
-      </div>
 
-      {/* Transaction History */}
-      <div className="px-[10%] py-10 bg-slate-200">
-        <div className="transactions border border-blue-700 rounded-lg shadow-blue-600 shadow-sm">
-          <h3 className="text-[28px] text-white dm-sans-font font-semibold bg-blue-700 rounded-t-lg pl-4 mb-2">
-            Transactions
-          </h3>
-
-          {/* All Transaction */}
-          <ul>
-            {transactions.length > 0 ? (
-              transactions.map((transaction) => {
-                const {
-                  description,
-                  transactionAmount,
-                  transactionType,
-                  createdAT,
-                  id,
-                } = transaction;
-
-                const formattedDate = createdAT?.seconds
-                  ? format(new Date(createdAT.seconds * 1000), "PPpp")
-                  : "Unknown date";
-
-                return (
-                  <li
-                    key={id}
-                    className="px-4 py-1 border-b border-gray-400 mb-2"
-                  >
-                    <h4 className="text-[20px] capitalize font-semibold">
-                      {description}
-                    </h4>
-
-                    <div className="flex items-center justify-between">
-                      <p>
-                        LKR {transactionAmount}{" "}
-                        <label
-                          htmlFor=""
-                          style={{
-                            color:
-                              transactionType === "expense" ? "red" : "green",
-                          }}
-                          className="capitalize"
-                        >
-                          {transactionType}
-                        </label>
-                      </p>
-                      <p className="text-sm text-gray-500">{formattedDate}</p>
-                    </div>
-                  </li>
-                );
-              })
-            ) : (
-              <li className="px-4 py-1">
-                <h4 className="text-[20px] capitalize font-semibold">
-                  No transactions
-                </h4>
-              </li>
-            )}
-          </ul>
+        {/* Transaction History */}
+        <div className="px-[10%] py-10 bg-slate-200">
+          <div className="transactions mt-10">
+            <h2 className="text-[30px] text-center">Transactions</h2>
+            <ul className="list-none p-0">
+              {transactions.map((transaction) => (
+                <li
+                  key={transaction.id}
+                  className={`p-4 border border-gray-300 rounded-lg mb-2 ${
+                    transaction.transactionType === "income"
+                      ? "bg-green-100"
+                      : "bg-red-100"
+                  }`}
+                >
+                  <div className="flex justify-between">
+                    <span className="font-semibold">
+                      {transaction.description}
+                    </span>
+                    <span>LKR {transaction.transactionAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>
+                      {isValid(new Date(transaction.createdAT)) &&
+                        format(
+                          new Date(transaction.createdAT),
+                          "dd MMM yyyy HH:mm"
+                        )}
+                    </span>
+                    <button
+                      onClick={() => handleDelete(transaction.id)}
+                      className="text-red-500 hover:text-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </>

@@ -31,10 +31,14 @@ export const useGetTransactions = () => {
         );
 
         const unsubscribe = onSnapshot(queryTransactions, (snapshot) => {
-          const docs = snapshot.docs.map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-          }));
+          const docs = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              ...data,
+              id: doc.id,
+              createdAT: data.createdAT ? data.createdAT.toDate() : new Date(), // Check for null and default to current date
+            };
+          });
 
           let totalIncome = 0;
           let totalExpenses = 0;
@@ -70,5 +74,5 @@ export const useGetTransactions = () => {
     };
   }, [userID]);
 
-  return { transactions, transactionsTotal };
+  return { transactions, transactionsTotal, setTransactions };
 };
